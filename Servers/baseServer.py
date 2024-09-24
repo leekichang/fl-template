@@ -67,7 +67,7 @@ class BaseServer(object):
         sampled_clients_idx = np.sort(sampled_clients_idx)
         return sampled_clients_idx
     
-    def dispatch(self): # 각 클라이언트에게 할당된 클러스터의 모델을 반환
+    def dispatch(self):
         for cidx in range(self.n_clients):
             self.clients[cidx].model.load_state_dict(self.global_model.state_dict())
     
@@ -98,8 +98,8 @@ class BaseServer(object):
         for round in range(self.args.rounds):
             sampled_clients = self.sample_clients(int(self.args.p_ratio*self.n_clients))
             for client in sampled_clients:
-                self.clients[client].train()
-                loss, acc = self.clients[client].test()
+                self.client_train(client)
+                loss, acc = self.client_test(client)
             self.aggregate(sampled_clients)
             self.global_test(r=round)
             
@@ -109,9 +109,13 @@ class BaseServer(object):
             self.round += 1 # TODO: FIX THIS
             print(f"####### ROUND {round+1} END #######\n")
 
+    def client_train(self, client_id):
+        self.clients[client_id].train()
+
     def client_test(self, client_id):
-        raise NotImplementedError
-    
+        loss, acc = self.clients[client_id].test()
+        return loss, acc
+        
     def save_global_model(self, round):
         torch.save(self.global_model.state_dict(), f'{self.save_path }/global_{round}.pth')
 

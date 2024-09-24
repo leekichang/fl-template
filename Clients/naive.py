@@ -14,7 +14,7 @@ class NaiveClient(Clients.BaseClient):
     def setup(self):
         self.model       = utils.build_model(self.args)
         self.criterion   = nn.CrossEntropyLoss()
-        self.optimizer   = torch.optim.Adam(self.model.parameters(), lr=self.args.lr, weight_decay=self.args.lr*0.1)
+        self.optimizer   = utils.build_optimizer(self.model, self.args)
         self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.args.batch_size, shuffle=True , drop_last=True )
         self.testloader  = torch.utils.data.DataLoader(self.testset , batch_size=self.args.batch_size, shuffle=False, drop_last=False)
         self.n_samples   = len(self.trainset)
